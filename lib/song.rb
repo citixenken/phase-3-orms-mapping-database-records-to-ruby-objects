@@ -49,4 +49,32 @@ class Song
     song.save
   end
 
+  # Handling data from DB
+  # =====================
+
+  def self.new_from_db(row)
+    # Song.new(id: row[0], name: row[1], album: row[2])
+    #self.new is equivalent to Song.new
+    self.new(id: row[0], name: row[1], album: row[2])
+  end
+
+  def self.all
+    sql = <<-SQL 
+      SELECT * FROM songs
+    SQL
+
+    #returns an array
+    DB[:conn].execute(sql).map { |row| self.new_from_db(row) }
+  end
+
+  def self.find_by_name(name)
+    sql = <<-SQL
+      SELECT * FROM songs WHERE name = ? LIMIT 1
+    SQL
+
+    # find the song
+    DB[:conn].execute(sql, name).map do |row| 
+      self.new_from_db(row) 
+    end.first #chaining => grabbing first element from returned array
+  end
 end
